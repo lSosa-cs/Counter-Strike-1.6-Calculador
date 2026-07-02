@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source Dedicated Server Rate Calculator 2015 v1.2-1.1.2015</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            background-image: linear-gradient(#262626 1px, transparent 1px), linear-gradient(90deg, #262626 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #b3b3b3;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-bar {
+            background: linear-gradient(to bottom, #3c3c3c, #222222);
+            border-bottom: 1px solid #111;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+        .header-bar span { font-size: 9px; color: #555; }
+
+        .main-wrapper {
+            padding: 15px;
+            max-width: 900px;
+        }
+
+        .tickrate-selector {
+            margin-bottom: 10px;
+        }
+        .tickrate-selector select {
+            background: #2b2b2b;
+            border: 1px solid #444;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        .note {
+            color: #666;
+            font-size: 11px;
+            margin-bottom: 15px;
+            line-height: 14px;
+        }
+
+        .flex-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            background: rgba(45, 45, 45, 0.3);
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 15px 12px 12px 12px;
+            flex: 1;
+            min-width: 260px;
+            position: relative;
+        }
+
+        .panel-title {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: #1a1a1a;
+            padding: 0 4px;
+            color: #707070;
+            font-size: 11px;
+        }
+
+        .default-btn {
+            float: right;
+            background: #4672a8;
+            border: 1px solid #5d8bc4;
+            color: #fff;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            clear: both;
+        }
+        .row label {
+            color: #8c8c8c;
+        }
+        .row input {
+            background: #222;
+            border: 1px solid #3a3a3a;
+            color: #fff;
+            width: 75px;
+            text-align: right;
+            padding: 2px 4px;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        .netgraph-box {
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #000;
+            height: 220px;
+            position: relative;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+        }
+
+        .graph-sim {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            height: 90px;
+            background: linear-gradient(to top, rgba(0, 220, 0, 0.6) 0%, rgba(0, 220, 0, 0.6) 45%, rgba(220, 0, 0, 0.7) 48%, rgba(220, 0, 0, 0.7) 55%, transparent 60%);
+        }
+
+        .netgraph-text {
+            position: absolute;
+            bottom: 8px;
+            left: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #fff;
+            line-height: 14px;
+            width: calc(100% - 24px);
+        }
+        .netgraph-col {
+            display: inline-block;
+        }
+        .netgraph-right {
+            float: right;
+            text-align: right;
+        }
+
+        .bottom-panels {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .console-output {
+            background: #050505;
+            border: 1px solid #252525;
+            font-family: monospace;
+            padding: 12px;
+            color: #999;
+            font-size: 11px;
+            line-height: 16px;
+            flex: 1.2;
+            min-width: 320px;
+            border-radius: 4px;
+        }
+        .comment-text { color: #4da64d; }
+        .command-text { color: #e5a93c; font-weight: bold; }
+        .value-text { color: #4a90e2; }
+
+        .input-panel {
+            background: rgba(45, 45, 45, 0.2);
+            border: 1px solid #2a2a2a;
+            padding: 15px;
+            flex: 0.8;
+            min-width: 280px;
+            border-radius: 6px;
+        }
+        .input-panel input {
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 3px;
+            width: 55px;
+            border-radius: 3px;
+            text-align: center;
+            font-size: 11px;
+        }
+        .unit-toggle {
+            background: #3a6da6;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            font-size: 10px;
+            border-radius: 3px;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    Source Dedicated Server Rate Calculator 2015 <span>v1.2-1.1.2015</span>
+</div>
+
+<div class="main-wrapper">
+    
+    <div class="tickrate-selector">
+        <label style="color:#8c8c8c;">Server -tickrate</label>
+        <select id="tickrate" onchange="calcularTodo()">
+            <option value="12" selected>12</option>
+            <option value="33">33</option>
+            <option value="66">66</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+
+    <div class="note">
+        Note!<br>Server Settings will take effect the next time when you change the Client Settings.
+    </div>
+
+    <div class="flex-container">
+        <div class="panel">
+            <span class="panel-title">Server settings</span>
+            <button class="default-btn">Defaults</button>
+            <div style="margin-top: 10px;">
+                <div class="row"><label>sv_maxrate</label><input type="text" id="sv_maxrate" value="1000000" readonly></div>
+                <div class="row"><label>sv_maxupdaterate</label><input type="text" id="sv_maxupdaterate" value="102" readonly></div>
+                <div class="row"><label>sv_maxcmdrate</label><input type="text" id="sv_maxcmdrate" value="105" readonly></div>
+                <hr style="border:0; border-top:1px solid #2a2a2a; margin:6px 0;">
+                <div class="row"><label>sv_minrate</label><input type="text" value="25000" readonly></div>
+                <div class="row"><label>sv_minupdaterate</label><input type="text" value="10" readonly></div>
+                <div class="row"><label>sv_mincmdrate</label><input type="text" value="10" readonly></div>
+                <div class="row"><label>sv_client_cmdrate_difference</label><input type="text" value="20" readonly></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <span class="panel-title">Client settings</span>
+            <button class="default-btn">Defaults</button>
+            <div style="margin-top: 10px;">
+                <div class="row"><label>rate</label><input type="text" value="30000" readonly></div>
+                <div class="row"><label>cl_updaterate</label><input type="text" value="20" readonly></div>
+                <div class="row"><label>cl_cmdrate</label><input type="text" value="30" readonly></div>
+                <div class="row"><label>cl_interp</label><input type="text" value="0.1" readonly></div>
+                <div class="row"><label>cl_interp_ratio</label><input type="text" value="2.0" readonly></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="netgraph-box">
+        <div class="graph-sim"></div>
+        <div class="netgraph-text">
+            <div>
+                <span class="netgraph-col">fps: 60 &nbsp; ping: 14 ms</span>
+                <span class="netgraph-right">20/s</span>
+            </div>
+            <div>
+                <span class="netgraph-col">in : 2500 &nbsp; 30.00 k/s &nbsp; <span style="color:#e5a93c; font-weight:bold;">lerp : <span id="lerp_val">100.0</span> ms</span></span>
+                <span class="netgraph-right">12/s</span>
+            </div>
+            <div>
+                <span class="netgraph-col">out: 78 &nbsp; &nbsp; 4.93 k/s</span>
+                <span class="netgraph-right">12/s</span>
+            </div>
+            <div>
+                <span class="netgraph-col">loss: 0 &nbsp; choke: 0</span>
+                <span class="netgraph-right">30/s</span>
+            </div>
+            <div>
+                <span class="netgraph-col">sv : 12 &nbsp; var: 0.77 msec</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-panels">
+        
+        <div class="console-output" id="output_code"></div>
+
+        <div class="input-panel">
+            <div class="row" style="justify-content: flex-start; gap: 15px; margin-bottom:12px;">
+                <label style="width:140px; color:#8c8c8c;">Server upload bandwidth</label>
+                <div>
+                    <input type="number" id="bandwidth" value="8.00" step="0.5" oninput="calcularTodo()">
+                    <button class="unit-toggle">Mbps</button>
+                </div>
+            </div>
+            
+            <div class="row" style="justify-content: flex-start; gap: 15px; margin-bottom:12px;">
+                <label style="width:140px; color:#8c8c8c;">Server -maxplayers</label>
+                <input type="number" id="maxplayers" value="32" oninput="calcularTodo()">
+            </div>
+
+            <p style="color:#fff; font-size:11px; margin-top:15px; margin-bottom:5px;">You can host <span id="hosted_players" style="font-weight:bold;">33</span> players</p>
+            <p style="color:#555; font-size:11px; margin:0;">* Recommended Upload Bandwidth for <span id="current_players">32</span> players = <span id="req_band">7.68</span> Mbps</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function calcularTodo() {
+    const tick = document.getElementById('tickrate').value;
+    const band = parseFloat(document.getElementById('bandwidth').value) || 8.0;
+    const players = parseInt(document.getElementById('maxplayers').value) || 32;
+
+    let sv_maxrate = 1000000;
+    let final_updaterate = tick == "12" ? "102" : tick;
+    let final_cmdrate = tick == "12" ? "105" : (parseInt(tick) + 3).toString();
+
+    document.getElementById('sv_maxupdaterate').value = final_updaterate;
+    document.getElementById('sv_maxcmdrate').value = final_cmdrate;
+
+    // Lógica competitiva acordada: ex_interp "0" con ancho de banda óptimo
+    let ex_interp_val = "0";
+    let lerp_ms = "9.8";
+
+    if (band < 5) {
+        ex_interp_val = "0.03";
+        lerp_ms = "30.0";
+    }
+
+    document.getElementById('lerp_val').innerText = lerp_ms;
+    document.getElementById('hosted_players').innerText = Math.floor((band * 1024) / 245);
+    document.getElementById('current_players').innerText = players;
+    document.getElementById('req_band').innerText = ((players * 240) / 1024).toFixed(2);
+
+    const codeContainer = document.getElementById('output_code');
+    codeContainer.innerHTML = `
+        <span class="comment-text">// Recommended Server Settings</span><br>
+        sv_maxrate "${sv_maxrate}"<br>
+        sv_maxupdaterate "${final_updaterate}"<br>
+        sv_maxcmdrate "${final_cmdrate}"<br>
+        sv_minrate "30000"<br>
+        sv_minupdaterate "20"<br>
+        sv_mincmdrate "30"<br>
+        sv_client_cmdrate_difference "20"<br>
+        <span class="value-text">net_splitpacket_maxrate "1048576"</span><br>
+        <span class="comment-text">// sv_competitive_minspec "1"</span><br>
+        <span class="comment-text">// sv_use_steam_voice "0"</span><br><br>
+        <span class="comment-text">// Client Competitive Setup (ex_interp auto-calculation)</span><br>
+        <span class="command-text">ex_interp "${ex_interp_val}"</span>
+    `;
+}
+
+// Inicialización de la app
+calcularTodo();
+</script>
+
+</body>
+</html>
