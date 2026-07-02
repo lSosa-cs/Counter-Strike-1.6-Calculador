@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 1.6 Rate Calculator</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --container-bg: #1a1a1e;
+            --accent-color: #4caf50;
+            --text-color: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --border-color: #29292e;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        h1 { color: var(--accent-color); font-size: 24px; margin-top: 0; text-align: center; }
+        .description { color: var(--text-muted); font-size: 14px; text-align: center; margin-bottom: 24px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: black;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #45a049; }
+        .results { margin-top: 24px; display: none; }
+        h3 { border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; color: var(--accent-color); }
+        pre {
+            background-color: var(--bg-color);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+            color: #50fa7b;
+        }
+        .info-box { font-size: 13px; color: var(--text-muted); line-height: 1.6; background: #202024; padding: 12px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CS 1.6 Rate Calculator</h1>
+    <p class="description">Calculadora de rates optimizada para el motor GoldSrc.</p>
+    
+    <div class="form-group">
+        <label for="download">Velocidad de Bajada (Mbps):</label>
+        <input type="number" id="download" value="320" min="1">
+    </div>
+    
+    <div class="form-group">
+        <label for="upload">Velocidad de Subida (Mbps):</label>
+        <input type="number" id="upload" value="120" min="1">
+    </div>
+    
+    <button onclick="calcularRates()">Calcular Configuración</button>
+    
+    <div id="results" class="results">
+        <h3>Comandos para tu juego (console/autoexec.cfg)</h3>
+        <pre id="client-code"></pre>
+        
+        <h3>Diagnóstico del Impacto en Red</h3>
+        <div class="info-box" id="diagnostic"></div>
+    </div>
+</div>
+
+<script>
+function calcularRates() {
+    const down = parseFloat(document.getElementById('download').value);
+    const up = parseFloat(document.getElementById('upload').value);
+    
+    if (isNaN(down) || isNaN(up)) {
+        alert("Por favor introduce números válidos");
+        return;
+    }
+
+    let rate, updaterate, cmdrate, interp;
+    let diagnostico = "";
+
+    // Lógica matemática para el motor GoldSrc (CS 1.6)
+    if (down >= 10 && up >= 5) {
+        // Conexiones de alta velocidad (Fibra / Cable moderno)
+        rate = 100000;
+        updaterate = 102;
+        cmdrate = 105;
+        interp = "0.01";
+        diagnostico = `✓ Tienes una excelente línea. El juego consumirá ~360 kb/s totales (apenas el ${( (0.36 / down) * 100 ).toFixed(3)}% de tu bajada). Tu conexión está blindada contra el lag de otros dispositivos de la casa.`;
+    } else {
+        // Conexiones lentas o limitadas
+        const downKbps = down * 1000;
+        rate = Math.floor(downKbps * 0.70);
+        if (rate > 100000) rate = 100000;
+        if (rate < 20000) rate = 20000;
+
+        updaterate = Math.floor((rate / 1000) * 0.8);
+        if (updaterate > 102) updaterate = 102;
+        if (updaterate < 30) updaterate = 30;
+
+        cmdrate = updaterate + 3;
+        interp = (1 / updaterate).toFixed(3);
+        
+        diagnostico = `⚠ Tu línea es ajustada. Se han reducido los rates para proteger tus paquetes de datos y evitar choke/loss en el servidor. Evita descargas mientras juegas.`;
+    }
+
+    // Insertar comandos en pantalla
+    document.getElementById('client-code').innerText = 
+`rate "${rate}"\ncl_updaterate "${updaterate}"\ncl_cmdrate "${cmdrate}"\nex_interp "${interp}"\ncl_cmdbackup "2"`;
+
+    document.getElementById('diagnostic').innerText = diagnostico;
+    document.getElementById('results').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
